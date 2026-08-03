@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -24,14 +24,22 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Install Dependencies
-        run: flutter pub get
+      - name: Create Full Flutter Project & Merge Code
+        run: |
+          mkdir temp_app
+          flutter create temp_app --org com.example --template=app
+          cp -r lib/* temp_app/lib/
+          cp pubspec.yaml temp_app/pubspec.yaml
+          cd temp_app
+          flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        run: |
+          cd temp_app
+          flutter build apk --release
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: EmployeeApp-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: temp_app/build/app/outputs/flutter-apk/app-release.apk
